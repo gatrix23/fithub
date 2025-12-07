@@ -2,47 +2,35 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
-        'email',
-        'password',
+        'exp',
+        'level',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    // Opsional: auto-update level berdasarkan exp
+    public function setExpAttribute($value)
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        $this->attributes['exp'] = $value;
+        $this->attributes['level'] = $this->calculateLevel($value);
+    }
+
+    protected function calculateLevel($exp)
+    {
+        // Skema level: 
+        // Level 1: 0–99
+        // Level 2: 100–249
+        // Level 3: 250–499
+        // Level 4: 500–899
+        // Level 5: 900+
+        if ($exp >= 900) return 5;
+        if ($exp >= 500) return 4;
+        if ($exp >= 250) return 3;
+        if ($exp >= 100) return 2;
+        return 1;
     }
 }
